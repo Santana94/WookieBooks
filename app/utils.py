@@ -7,6 +7,10 @@ from fastapi import UploadFile
 from app.settings import settings
 
 
+def hash_password(password: str):
+    return password + "notreallyhashed"
+
+
 def get_file_path(input_file: UploadFile) -> str:
     file_path = f"{settings.media_path}{input_file.filename}"
     if os.path.isfile(file_path):

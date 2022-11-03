@@ -1,9 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel, validator
-from sqlalchemy.orm import Session
-
-from app import repository
+from pydantic import BaseModel
 
 
 class BookBase(BaseModel):
@@ -26,7 +23,7 @@ class Book(BookBase):
 
 
 class UserBase(BaseModel):
-    email: str
+    username: str
 
 
 class UserCreate(UserBase):
@@ -35,7 +32,6 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-    is_active: bool
     books: List[Book] = []
 
     class Config:
