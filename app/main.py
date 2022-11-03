@@ -1,10 +1,12 @@
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException
+import uvicorn
+from fastapi import Depends, FastAPI, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
-from . import repository, models, schemas
-from .database import SessionLocal, engine
+from app import repository, models, schemas
+from app import utils
+from app.database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -44,12 +46,16 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 
 @app.post("/users/{user_id}/books/", response_model=schemas.Book)
 def create_book_for_user(
-    user_id: int, book: schemas.BookCreate, db: Session = Depends(get_db)
+    user_id: int, cover_image: UploadFile, book: schemas.BookCreate = Depends(), db: Session = Depends(get_db)
 ):
-    return repository.create_user_book(db=db, book=book, user_id=user_id)
+    return repository.create_user_book(db=db, book=book, user_id=user_id, cover_image=cover_image)
 
 
 @app.get("/books/", response_model=List[schemas.Book])
 def read_books(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     books = repository.get_books(db, skip=skip, limit=limit)
     return books
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

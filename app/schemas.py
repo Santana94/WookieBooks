@@ -1,6 +1,9 @@
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+from sqlalchemy.orm import Session
+
+from app import repository
 
 
 class BookBase(BaseModel):
@@ -16,6 +19,7 @@ class BookCreate(BookBase):
 class Book(BookBase):
     id: int
     author_id: int
+    cover_image: str
 
     class Config:
         orm_mode = True

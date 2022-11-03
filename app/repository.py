@@ -1,6 +1,7 @@
+from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
-from . import models, schemas
+from . import models, schemas, utils
 
 
 def get_user(db: Session, user_id: int):
@@ -28,9 +29,22 @@ def get_books(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Book).offset(skip).limit(limit).all()
 
 
-def create_user_book(db: Session, book: schemas.BookCreate, user_id: int):
-    db_book = models.Book(**book.dict(), author_id=user_id)
-    db.add(db_book)
-    db.commit()
-    db.refresh(db_book)
-    return db_book
+def create_user_book(db: Session, book: schemas.BookCreate, user_id: int, cover_image: UploadFile):
+    try:
+        file_path = utils.get_file_path(input_file=cover_image)
+        db_book = models.Book(**book.dict(), cover_image=file_path, author_id=user_id)
+        db.add(db_book)
+        db.commit()
+        utils.write_file_to_media(input_file=cover_image, file_path=file_path)
+        db.refresh(db_book)
+        return db_book
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
+
+
+def validate_title(value, db: Session):
+    if db.query(models.Book).filter(models.Book.title == value).count():
+        raise ValueError('Title already exists!')
+    return value

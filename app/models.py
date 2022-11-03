@@ -19,9 +19,10 @@ class Book(Base):
     __tablename__ = "books"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, unique=True, index=True)
+    title = Column(String)
     description = Column(String)
     price = Column(Float)
+    cover_image = Column(String)
     author_id = Column(Integer, ForeignKey("users.id"))
 
     author = relationship("User", back_populates="books")
