@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from fastapi import FastAPI
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
@@ -42,6 +44,7 @@ def get_db():
         db.close()
 
 
+@lru_cache()
 def get_settings():
     settings = Settings()
     yield settings
