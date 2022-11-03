@@ -29,9 +29,13 @@ def get_books(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Book).offset(skip).limit(limit).all()
 
 
-def create_user_book(db: Session, book: schemas.BookCreate, user_id: int, cover_image: UploadFile):
+def get_book(db: Session, book_id: int):
+    return db.query(models.Book).filter(models.Book.id == book_id).first()
+
+
+def create_user_book(db: Session, book: schemas.BookCreate, user_id: int, cover_image: UploadFile, media_path: str):
     try:
-        file_path = utils.get_file_path(input_file=cover_image)
+        file_path = utils.get_file_path(input_file=cover_image, media_path=media_path)
         db_book = models.Book(**book.dict(), cover_image=file_path, author_id=user_id)
         db.add(db_book)
         db.commit()
