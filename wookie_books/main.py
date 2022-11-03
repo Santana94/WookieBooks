@@ -4,21 +4,17 @@ from typing import List
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi import UploadFile
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from wookie_books import repository, models, schemas, utils
+from wookie_books import repository, schemas, utils
 from wookie_books import settings
-from wookie_books.database import engine
-
-models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 
 @app.post("/token", response_model=schemas.Token)
 def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(settings.get_db),
+    form_data: schemas.PasswordRequestForm = Depends(), db: Session = Depends(settings.get_db),
     settings_variables: settings.Settings = Depends(settings.get_settings)
 ):
     user = repository.get_user_by_username(db=db, username=form_data.username)

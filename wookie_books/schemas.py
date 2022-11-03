@@ -1,5 +1,6 @@
 from typing import List, Union
 
+from fastapi import Form
 from pydantic import BaseModel
 
 
@@ -45,3 +46,13 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Union[str, None] = None
+
+
+class PasswordRequestForm:
+    def __init__(
+        self,
+        username: str = Form(),
+        password: str = Form(),
+    ):
+        self.username = username
+        self.password = password
