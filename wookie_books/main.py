@@ -1,14 +1,13 @@
 from typing import List
 
 import uvicorn
-from fastapi import Depends, FastAPI
+from fastapi import Depends
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
 from wookie_books import schemas, services
 from wookie_books import settings
-
-app = FastAPI()
+from wookie_books.settings import app
 
 
 @app.post("/token", response_model=schemas.Token)
