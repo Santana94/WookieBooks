@@ -65,6 +65,10 @@ def update_user(db: Session, user: schemas.UserUpdate, db_user: models.User):
     return repository.update_user(db=db, db_user=db_user, user_data=user.dict(exclude_unset=True))
 
 
+def delete_user(db: Session, db_user: models.User):
+    return repository.delete_user(db=db, db_user=db_user)
+
+
 def get_users(db: Session, skip: int, limit: int):
     users = repository.get_users(db=db, skip=skip, limit=limit)
     return users

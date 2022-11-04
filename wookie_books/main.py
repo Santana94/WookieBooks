@@ -37,15 +37,27 @@ def read_user(user_id: int, db: Session = Depends(settings.get_db)):
     return services.get_user(db=db, user_id=user_id)
 
 
-@app.patch("/users/{user_id}", response_model=schemas.User)
+@app.patch("/current_user/", response_model=schemas.User)
 def update_user(
-    user_id: int, user: schemas.UserUpdate, db: Session = Depends(settings.get_db),
+    user: schemas.UserUpdate, db: Session = Depends(settings.get_db),
     token: str = Depends(settings.oauth2_scheme), settings_variables: settings.Settings = Depends(settings.get_settings)
 ):
     db_user = services.get_current_user(
         db=db, token=token, algorith=settings_variables.algorith, secret_key=settings_variables.secret_key
     )
     return services.update_user(db=db, user=user, db_user=db_user)
+
+
+@app.delete("/current_user/")
+def delete_user(
+    db: Session = Depends(settings.get_db), token: str = Depends(settings.oauth2_scheme),
+    settings_variables: settings.Settings = Depends(settings.get_settings)
+):
+    db_user = services.get_current_user(
+        db=db, token=token, algorith=settings_variables.algorith, secret_key=settings_variables.secret_key
+    )
+    services.delete_user(db=db, db_user=db_user)
+    return "User deleted successfully!"
 
 
 @app.post("/users/{user_id}/books/", response_model=schemas.Book)

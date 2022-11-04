@@ -34,6 +34,11 @@ def update_user(db: Session, user_data: dict, db_user: models.User):
     return db_user
 
 
+def delete_user(db: Session, db_user: models.User):
+    db.delete(db_user)
+    db.commit()
+
+
 def get_books(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Book).offset(skip).limit(limit).all()
 
