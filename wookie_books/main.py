@@ -45,7 +45,7 @@ def update_user(
     db_user = services.get_current_user(
         db=db, token=token, algorith=settings_variables.algorith, secret_key=settings_variables.secret_key
     )
-    return services.update_user(db=db, user=user, user_id=user_id, db_user=db_user)
+    return services.update_user(db=db, user=user, db_user=db_user)
 
 
 @app.post("/users/{user_id}/books/", response_model=schemas.Book)

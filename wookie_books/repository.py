@@ -25,9 +25,13 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 
-def update_user(db: Session, user: schemas.UserUpdate, user_id: int):
-    db.query(models.User).filter(models.User.id == user_id).update(user.dict(exclude_unset=True))
+def update_user(db: Session, user_data: dict, db_user: models.User):
+    for key, value in user_data.items():
+        setattr(db_user, key, value)
+    db.add(db_user)
     db.commit()
+    db.refresh(db_user)
+    return db_user
 
 
 def get_books(db: Session, skip: int = 0, limit: int = 100):

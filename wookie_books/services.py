@@ -61,10 +61,8 @@ def create_user(db: Session, user: schemas.UserCreate):
     return repository.create_user(db=db, user=user)
 
 
-def update_user(db: Session, user: schemas.UserUpdate, user_id: int, db_user: models.User):
-    repository.update_user(db=db, user=user, user_id=user_id)
-    db.refresh(db_user)
-    return db_user
+def update_user(db: Session, user: schemas.UserUpdate, db_user: models.User):
+    return repository.update_user(db=db, db_user=db_user, user_data=user.dict(exclude_unset=True))
 
 
 def get_users(db: Session, skip: int, limit: int):
