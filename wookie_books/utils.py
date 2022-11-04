@@ -6,7 +6,6 @@ from typing import Union
 from fastapi import UploadFile
 from jose import jwt
 
-from wookie_books import models
 from wookie_books import settings
 
 
@@ -16,14 +15,6 @@ def verify_password(plain_password: str, hashed_password: str):
 
 def get_password_hash(password: str):
     return settings.pwd_context.hash(password)
-
-
-def authenticate_user(user: models.User, password: str):
-    if not user:
-        return False
-    if not verify_password(password, user.hashed_password):
-        return False
-    return user
 
 
 def create_access_token(data: dict, secret_key: str, algorith: str, expires_delta: Union[timedelta, None] = None):

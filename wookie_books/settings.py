@@ -46,8 +46,7 @@ def get_db():
 
 @lru_cache()
 def get_settings():
-    settings = Settings()
-    yield settings
+    return Settings()
 
 
 # APP INITIALIZATION

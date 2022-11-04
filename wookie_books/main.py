@@ -6,7 +6,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
-from wookie_books import repository, schemas, utils
+from wookie_books import repository, schemas, utils, services
 from wookie_books import settings
 
 app = FastAPI()
@@ -18,7 +18,7 @@ def login_for_access_token(
     settings_variables: settings.Settings = Depends(settings.get_settings)
 ):
     user = repository.get_user_by_username(db=db, username=form_data.username)
-    user = utils.authenticate_user(user=user, password=form_data.password)
+    user = services.authenticate_user(user=user, password=form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -57,11 +57,14 @@ def read_user(user_id: int, db: Session = Depends(settings.get_db)):
 
 @app.post("/users/{user_id}/books/", response_model=schemas.Book)
 def create_book_for_user(
-    user_id: int, cover_image: UploadFile, book: schemas.BookCreate = Depends(), db: Session = Depends(settings.get_db),
+    cover_image: UploadFile, book: schemas.BookCreate = Depends(), db: Session = Depends(settings.get_db),
     token: str = Depends(settings.oauth2_scheme), settings_variables: settings.Settings = Depends(settings.get_settings)
 ):
+    user = services.get_current_user(
+        db=db, token=token, algorith=settings_variables.algorith, secret_key=settings_variables.secret_key
+    )
     return repository.create_user_book(
-        db=db, book=book, user_id=user_id, cover_image=cover_image, media_path=settings_variables.media_path
+        db=db, book=book, user_id=user.id, cover_image=cover_image, media_path=settings_variables.media_path
     )
 
 
