@@ -1,11 +1,9 @@
 import pytest
-
-from wookie_books.main import app
-from wookie_books.models import Base
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from wookie_books.main import app
+from wookie_books.models import Base
 from wookie_books.settings import get_db
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
