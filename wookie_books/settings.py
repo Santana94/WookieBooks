@@ -5,8 +5,9 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import BaseSettings
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+from wookie_books.models import Base
 
 
 class Settings(BaseSettings):
@@ -26,7 +27,6 @@ engine = create_engine(
     Settings().sql_alchemy_database_url, connect_args={"check_same_thread": False}
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 Base.metadata.create_all(bind=engine)
 
 

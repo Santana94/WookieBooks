@@ -96,3 +96,9 @@ def get_book(book_id: int, db: Session):
     if db_book is None:
         raise HTTPException(status_code=404, detail="Book not found")
     return db_book
+
+
+def delete_book(db_book: models.Book, db_user: models.User, db: Session):
+    if db_book.author_id != db_user.id:
+        raise HTTPException(status_code=401, detail="You can not delete a book from another author!")
+    repository.delete_book(db_book=db_book, db=db)

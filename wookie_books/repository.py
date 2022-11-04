@@ -36,6 +36,8 @@ def update_user(db: Session, user_data: dict, db_user: models.User):
 
 def delete_user(db: Session, db_user: models.User):
     db.delete(db_user)
+    for db_book in db_user.books:
+        db.delete(db_book)
     db.commit()
 
 
@@ -45,6 +47,11 @@ def get_books(db: Session, skip: int = 0, limit: int = 100):
 
 def get_book(db: Session, book_id: int):
     return db.query(models.Book).filter(models.Book.id == book_id).first()
+
+
+def delete_book(db: Session, db_book: models.Book):
+    db.delete(db_book)
+    db.commit()
 
 
 def create_user_book(db: Session, book: schemas.BookCreate, user_id: int, cover_image: UploadFile, media_path: str):

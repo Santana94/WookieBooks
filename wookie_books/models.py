@@ -1,7 +1,8 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Float
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
 
-from wookie_books.settings import Base
+Base = declarative_base()
 
 
 class User(Base):

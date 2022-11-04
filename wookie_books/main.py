@@ -83,5 +83,18 @@ def read_book(book_id: int, db: Session = Depends(settings.get_db)):
     return services.get_book(book_id=book_id, db=db)
 
 
+@app.delete("/books/{book_id}")
+def delete_book(
+    book_id: int, db: Session = Depends(settings.get_db), token: str = Depends(settings.oauth2_scheme),
+    settings_variables: settings.Settings = Depends(settings.get_settings)
+):
+    db_book = services.get_book(book_id=book_id, db=db)
+    db_user = services.get_current_user(
+        db=db, token=token, algorith=settings_variables.algorith, secret_key=settings_variables.secret_key
+    )
+    services.delete_book(db_book=db_book, db_user=db_user, db=db)
+    return "Book deleted successfully!"
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
