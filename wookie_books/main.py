@@ -1,12 +1,11 @@
-from datetime import timedelta
 from typing import List
 
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
-from wookie_books import repository, schemas, utils, services
+from wookie_books import schemas, services
 from wookie_books import settings
 
 app = FastAPI()
@@ -17,42 +16,25 @@ def login_for_access_token(
     form_data: schemas.PasswordRequestForm = Depends(), db: Session = Depends(settings.get_db),
     settings_variables: settings.Settings = Depends(settings.get_settings)
 ):
-    user = repository.get_user_by_username(db=db, username=form_data.username)
-    user = services.authenticate_user(user=user, password=form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=settings_variables.access_toke_expire_minutes)
-    access_token = utils.create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires, secret_key=settings_variables.secret_key,
-        algorith=settings_variables.algorith
+    return services.get_access_token_for_authenticated_user(
+        db=db, username=form_data.username, password=form_data.password, secret_key=settings_variables.secret_key,
+        access_toke_expire_minutes=settings_variables.access_toke_expire_minutes, algorith=settings_variables.algorith
     )
-    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @app.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(settings.get_db)):
-    db_user = repository.get_user_by_username(db=db, username=user.username)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    return repository.create_user(db=db, user=user)
+    return services.create_user(db=db, user=user)
 
 
 @app.get("/users/", response_model=List[schemas.User])
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(settings.get_db)):
-    users = repository.get_users(db=db, skip=skip, limit=limit)
-    return users
+    return services.get_users(db=db, skip=skip, limit=limit)
 
 
 @app.get("/users/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, db: Session = Depends(settings.get_db)):
-    db_user = repository.get_user(db, user_id=user_id)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+    return services.get_user(db=db, user_id=user_id)
 
 
 @app.post("/users/{user_id}/books/", response_model=schemas.Book)
@@ -63,23 +45,19 @@ def create_book_for_user(
     user = services.get_current_user(
         db=db, token=token, algorith=settings_variables.algorith, secret_key=settings_variables.secret_key
     )
-    return repository.create_user_book(
+    return services.create_user_book(
         db=db, book=book, user_id=user.id, cover_image=cover_image, media_path=settings_variables.media_path
     )
 
 
 @app.get("/books/", response_model=List[schemas.Book])
 def read_books(skip: int = 0, limit: int = 100, db: Session = Depends(settings.get_db)):
-    books = repository.get_books(db=db, skip=skip, limit=limit)
-    return books
+    return services.get_books(skip=skip, limit=limit, db=db)
 
 
 @app.get("/books/{book_id}", response_model=schemas.Book)
 def read_book(book_id: int, db: Session = Depends(settings.get_db)):
-    db_book = repository.get_book(db=db, book_id=book_id)
-    if db_book is None:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return db_book
+    return services.get_book(book_id=book_id, db=db)
 
 
 if __name__ == "__main__":
