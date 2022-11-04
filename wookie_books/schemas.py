@@ -31,6 +31,11 @@ class UserCreate(UserBase):
     password: str
 
 
+class UserUpdate(BaseModel):
+    username: Union[str, None] = None
+    password: Union[str, None] = None
+
+
 class User(UserBase):
     id: int
     books: List[Book] = []

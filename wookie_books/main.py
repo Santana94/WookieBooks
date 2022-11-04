@@ -37,16 +37,27 @@ def read_user(user_id: int, db: Session = Depends(settings.get_db)):
     return services.get_user(db=db, user_id=user_id)
 
 
+@app.patch("/users/{user_id}", response_model=schemas.User)
+def update_user(
+    user_id: int, user: schemas.UserUpdate, db: Session = Depends(settings.get_db),
+    token: str = Depends(settings.oauth2_scheme), settings_variables: settings.Settings = Depends(settings.get_settings)
+):
+    db_user = services.get_current_user(
+        db=db, token=token, algorith=settings_variables.algorith, secret_key=settings_variables.secret_key
+    )
+    return services.update_user(db=db, user=user, user_id=user_id, db_user=db_user)
+
+
 @app.post("/users/{user_id}/books/", response_model=schemas.Book)
 def create_book_for_user(
     cover_image: UploadFile, book: schemas.BookCreate = Depends(), db: Session = Depends(settings.get_db),
     token: str = Depends(settings.oauth2_scheme), settings_variables: settings.Settings = Depends(settings.get_settings)
 ):
-    user = services.get_current_user(
+    db_user = services.get_current_user(
         db=db, token=token, algorith=settings_variables.algorith, secret_key=settings_variables.secret_key
     )
     return services.create_user_book(
-        db=db, book=book, user_id=user.id, cover_image=cover_image, media_path=settings_variables.media_path
+        db=db, book=book, user_id=db_user.id, cover_image=cover_image, media_path=settings_variables.media_path
     )
 
 
