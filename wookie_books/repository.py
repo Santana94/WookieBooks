@@ -50,8 +50,15 @@ def get_book(db: Session, book_id: int):
 
 
 def delete_book(db: Session, db_book: models.Book):
-    db.delete(db_book)
-    db.commit()
+    try:
+        file_path = db_book.cover_image
+        db.delete(db_book)
+        db.commit()
+        utils.delete_file_from_media(file_path=file_path)
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
 
 
 def create_user_book(db: Session, book: schemas.BookCreate, user_id: int, cover_image: UploadFile, media_path: str):

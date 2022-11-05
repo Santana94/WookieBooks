@@ -36,5 +36,12 @@ def get_file_path(input_file: UploadFile, media_path: str):
 
 
 def write_file_to_media(input_file: UploadFile, file_path: str):
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(input_file.file, buffer)
+    with open(file_path, "wb") as file:
+        shutil.copyfileobj(input_file.file, file)
+
+
+def delete_file_from_media(file_path: str):
+    if os.path.isfile(file_path) or os.path.islink(file_path):
+        os.unlink(file_path)
+    elif os.path.isdir(file_path):
+        shutil.rmtree(file_path)

@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 
@@ -22,7 +24,8 @@ def test_list_books(client, create_base_books, base_user):
     assert response.json() == books
 
 
-def test_get_book(client, base_book):
+def test_get_book(client, create_book):
+    base_book = create_book()
     book_data = {
         "author_id": base_book.author_id, "cover_image": base_book.cover_image,
         "description": base_book.description, "id": base_book.id, "price": base_book.price,
@@ -33,9 +36,36 @@ def test_get_book(client, base_book):
     assert response.json() == book_data
 
 
-def test_get_no_book(client, base_book):
+def test_get_no_book(client, create_book):
+    base_book = create_book()
     response = client.get(f"/books/{base_book.id + 10}")
     assert response.status_code == 404
+
+
+def test_delete_book(db, client, base_user, create_book, get_auth_headers, base_user_password):
+    username = base_user.username
+    book = create_book(user_id=base_user.id)
+    book.cover_image = "resources/BookCover.jpg"
+    db.add(book)
+    db.commit()
+    headers = get_auth_headers(username=username, password=base_user_password)
+    with open(book.cover_image, "wb"):
+        pass
+
+    assert os.path.isfile(book.cover_image) is True
+
+    response = client.delete(f"/books/{book.id}", headers=headers)
+    assert response.status_code == 200
+    assert os.path.isfile(book.cover_image) is False
+
+
+def test_delete_book_not_authorized(client, create_book):
+    base_book = create_book()
+    with open("resources/BookCover.jpg", "wb"):
+        pass
+
+    response = client.delete(f"/books/{base_book.id}")
+    assert response.status_code == 200
 
 
 def test_unauthenticated_user_can_not_post_books(client):
