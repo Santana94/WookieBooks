@@ -68,6 +68,14 @@ def test_delete_book_not_authorized(client, create_book):
     assert response.status_code == 200
 
 
+def test_delete_book_from_another_user(client, create_book, base_users, get_auth_headers, base_user_password):
+    current_username = base_users[0].username
+    base_book = create_book(user_id=base_users[1].id)
+    headers = get_auth_headers(username=current_username, password=base_user_password)
+    response = client.delete(f"/books/{base_book.id}", headers=headers)
+    assert response.status_code == 401
+
+
 def test_unauthenticated_user_can_not_post_books(client):
     response = client.post("/users/1/books/")
     assert response.status_code == 401
