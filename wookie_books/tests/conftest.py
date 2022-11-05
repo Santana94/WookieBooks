@@ -83,6 +83,16 @@ def create_base_books(db, mocker):
 
 
 @pytest.fixture
+def base_book(db, mocker, base_user):
+    mocker.patch("wookie_books.utils.write_file_to_media")
+    return repository.create_user_book(
+        db=db, user_id=base_user.id,
+        book=schemas.BookCreate(title=f"Some Title", description=f"Some Description", price=10),
+        cover_image=UploadFile(filename="something"), media_path="some_path/"
+    )
+
+
+@pytest.fixture
 def darth_vader_password():
     return "shmi_skywalker"
 

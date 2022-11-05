@@ -22,6 +22,22 @@ def test_list_books(client, create_base_books, base_user):
     assert response.json() == books
 
 
+def test_get_book(client, base_book):
+    book_data = {
+        "author_id": base_book.author_id, "cover_image": base_book.cover_image,
+        "description": base_book.description, "id": base_book.id, "price": base_book.price,
+        "title": base_book.title
+    }
+    response = client.get(f"/books/{base_book.id}")
+    assert response.status_code == 200
+    assert response.json() == book_data
+
+
+def test_get_no_book(client, base_book):
+    response = client.get(f"/books/{base_book.id + 10}")
+    assert response.status_code == 404
+
+
 def test_unauthenticated_user_can_not_post_books(client):
     response = client.post("/users/1/books/")
     assert response.status_code == 401
