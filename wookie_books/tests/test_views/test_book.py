@@ -1,10 +1,25 @@
 import pytest
 
 
-def test_read_books(client):
+def test_list_no_books(client):
     response = client.get("/books/")
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_list_books(client, create_base_books, base_user):
+    user_id = base_user.id
+    books = [
+        {
+            "author_id": user_book.author_id, "cover_image": user_book.cover_image,
+            "description": user_book.description, "id": user_book.id, "price": user_book.price,
+            "title": user_book.title
+        }
+        for user_book in create_base_books(user_id=user_id)
+    ]
+    response = client.get("/books/")
+    assert response.status_code == 200
+    assert response.json() == books
 
 
 def test_unauthenticated_user_can_not_post_books(client):
