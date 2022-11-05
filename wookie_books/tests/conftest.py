@@ -1,10 +1,11 @@
 import pytest
+from fastapi import UploadFile
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 
-from wookie_books import repository, schemas
+from wookie_books import repository, schemas, models
 from wookie_books.main import app
 from wookie_books.models import Base
 from wookie_books.settings import get_db
@@ -60,6 +61,21 @@ def base_users(db):
 @pytest.fixture
 def base_user(db):
     return repository.create_user(db=db, user=schemas.UserCreate(username="base_user", password="generic"))
+
+
+@pytest.fixture
+def create_base_books(db, mocker):
+    def create_books(user_id: int):
+        mocker.patch("wookie_books.utils.write_file_to_media")
+        return [
+            repository.create_user_book(
+                db=db, user_id=user_id,
+                book=schemas.BookCreate(title=f"Some Title {i}", description=f"Some Description {i}", price=10 + i),
+                cover_image=UploadFile(filename="something"), media_path="some_path/"
+            )
+            for i in range(3)
+        ]
+    return create_books
 
 
 @pytest.fixture

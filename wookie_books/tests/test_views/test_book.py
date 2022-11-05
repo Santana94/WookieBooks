@@ -45,7 +45,9 @@ def test_user_can_create_book(client, authenticate_user, base_user, mocker):
             f"/users/{base_user.id}/books/{query_params}", headers=headers, files=files
         )
     assert response.status_code == 200
-    assert response.json() == {
-        'title': 'Title', 'description': 'Description', 'price': 10000.0, 'id': 1, 'author_id': author_id,
+    response_data = response.json()
+    response_data.pop("id")
+    assert response_data == {
+        'title': 'Title', 'description': 'Description', 'price': 10000.0, 'author_id': author_id,
         'cover_image': 'media/filename'
     }
