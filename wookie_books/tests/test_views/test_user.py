@@ -17,7 +17,12 @@ def test_get_user(base_user, client):
     assert data["id"] == base_user.id
 
 
-def test_list_users(base_users, client, create_base_books):
+def test_get_user_not_found(base_user, client):
+    response = client.get(f"/users/{base_user.id + 10}/")
+    assert response.status_code == 404
+
+
+def test_list_users_with_books(base_users, client, create_base_books):
     users_data = [
         {"username": user.username, "id": user.id}
         for user in base_users
@@ -34,3 +39,19 @@ def test_list_users(base_users, client, create_base_books):
     response = client.get(f"/users/")
     assert response.status_code == 200
     assert response.json() == users_data
+
+
+def test_list_users_without_books(base_users, client):
+    users_data = [
+        {"username": user.username, "id": user.id, "books": []}
+        for user in base_users
+    ]
+    response = client.get(f"/users/")
+    assert response.status_code == 200
+    assert response.json() == users_data
+
+
+def test_list_no_users(client):
+    response = client.get(f"/users/")
+    assert response.status_code == 200
+    assert response.json() == []
