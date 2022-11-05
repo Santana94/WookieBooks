@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 
-from wookie_books import repository, schemas, models
+from wookie_books import repository, schemas
 from wookie_books.main import app
 from wookie_books.models import Base
 from wookie_books.settings import get_db

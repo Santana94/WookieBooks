@@ -1,6 +1,6 @@
 ## Wookie Books
 
-### How to setup
+### How to set up
 
 Running the project:
 ```
