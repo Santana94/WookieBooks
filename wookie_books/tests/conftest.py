@@ -60,3 +60,15 @@ def base_users(db):
 @pytest.fixture
 def base_user(db):
     return repository.create_user(db=db, user=schemas.UserCreate(username="base_user", password="generic"))
+
+
+@pytest.fixture
+def darth_vader(db):
+    return repository.create_user(db=db, user=schemas.UserCreate(username="darth_vader", password="shmi_skywalker"))
+
+
+@pytest.fixture
+def authenticate_user(client):
+    def authenticate(username: str, password: str):
+        return client.post("/token", data={"username": username, "password": password}).json()
+    return authenticate
