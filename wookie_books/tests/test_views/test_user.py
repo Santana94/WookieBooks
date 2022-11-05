@@ -1,5 +1,7 @@
 import pytest
 
+from wookie_books import repository
+
 
 def test_create_user(client):
     response = client.post(
@@ -96,9 +98,7 @@ def test_list_no_users(client):
         {'books': [], 'username': '123'},
     ),
 ])
-def test_update_user(
-    base_user, client, data, expected_response, get_auth_headers, base_user_password
-):
+def test_update_user(base_user, client, data, expected_response, get_auth_headers, base_user_password):
     headers = get_auth_headers(username=base_user.username, password=base_user_password)
     response = client.patch(f"/current_user/", json=data, headers=headers)
     assert response.status_code == 200
@@ -107,8 +107,20 @@ def test_update_user(
     assert response_data == expected_response
 
 
-def test_update_user_with_no_permission(
-    base_users, client, get_auth_headers, base_user_password
-):
+def test_update_user_with_no_permission(base_user, client, get_auth_headers, base_user_password):
     response = client.patch(f"/current_user/", json={"password": "some_password", "username": "123"})
     assert response.status_code == 401
+
+
+def test_delete_user_with_no_permission(base_user, client, get_auth_headers, base_user_password):
+    response = client.delete(f"/current_user/")
+    assert response.status_code == 401
+
+
+def test_delete_user(base_user, client, get_auth_headers, base_user_password, db):
+    user_id = base_user.id
+    headers = get_auth_headers(username=base_user.username, password=base_user_password)
+    assert repository.get_user(db=db, user_id=user_id) is not None
+    response = client.delete(f"/current_user/", headers=headers)
+    assert response.status_code == 200
+    assert repository.get_user(db=db, user_id=user_id) is None
