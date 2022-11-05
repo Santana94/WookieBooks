@@ -25,6 +25,7 @@ def test_darth_vader_can_not_create_book(client, authenticate_user, darth_vader,
 
 def test_user_can_create_book(client, authenticate_user, base_user, mocker):
     mocker.patch("wookie_books.utils.write_file_to_media")
+    author_id = base_user.id
     token_data = authenticate_user(username=base_user.username, password="generic")
     headers = {"Authorization": f"{token_data['token_type'].capitalize()} {token_data['access_token']}"}
     query_params = "?title=Title&description=Description&price=10000"
@@ -35,6 +36,6 @@ def test_user_can_create_book(client, authenticate_user, base_user, mocker):
         )
     assert response.status_code == 200
     assert response.json() == {
-        'title': 'Title', 'description': 'Description', 'price': 10000.0, 'id': 1, 'author_id': 1,
+        'title': 'Title', 'description': 'Description', 'price': 10000.0, 'id': 1, 'author_id': author_id,
         'cover_image': 'media/filename'
     }
