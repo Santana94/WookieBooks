@@ -23,9 +23,11 @@ class Settings(BaseSettings):
 
 
 # DATABASE
-engine = create_engine(
-    Settings().sql_alchemy_database_url, connect_args={"check_same_thread": False}
-)
+sql_alchemy_base_url = Settings().sql_alchemy_database_url
+engine_args = {}
+if "sqlite" in sql_alchemy_base_url:
+    engine_args = {"connect_args": {"check_same_thread": False}}
+engine = create_engine(sql_alchemy_base_url, **engine_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
 
