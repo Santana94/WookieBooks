@@ -1,3 +1,6 @@
+import pytest
+
+
 def test_create_user(client):
     response = client.post(
         "/users/",
@@ -7,6 +10,24 @@ def test_create_user(client):
     data = response.json()
     assert data["username"] == "deadpool"
     assert "id" in data
+
+
+@pytest.mark.parametrize("data, error_field", [
+    ({"username": "deadpool"}, "password"), ({"password": "chimichangas4life"}, "username")
+])
+def test_create_user_without_required_data(client, data, error_field):
+    response = client.post(
+        "/users/",
+        json=data,
+    )
+    assert response.status_code == 422
+    assert response.json() == {'detail': [
+        {
+            'loc': ['body', error_field],
+            'msg': 'field required',
+            'type': 'value_error.missing'
+        }
+    ]}
 
 
 def test_get_user(base_user, client):
