@@ -67,6 +67,7 @@ def create_book_for_user(
     db_user = services.get_current_user(
         db=db, token=token, algorith=settings_variables.algorith, secret_key=settings_variables.secret_key
     )
+    services.validate_dark_lord(username=db_user.username)
     return services.create_user_book(
         db=db, book=book, user_id=db_user.id, cover_image=cover_image, media_path=settings_variables.media_path
     )

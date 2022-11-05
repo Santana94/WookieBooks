@@ -81,6 +81,12 @@ def get_user(db: Session, user_id: int):
     return db_user
 
 
+def validate_dark_lord(username):
+    lower_username = username.lower()
+    if "darth" in lower_username or "vader" in lower_username:
+        raise HTTPException(status_code=401, detail="The dark lord can not submit books!")
+
+
 def create_user_book(db: Session, book: schemas.BookCreate, user_id: int, cover_image: UploadFile, media_path: str):
     return repository.create_user_book(
         db=db, book=book, user_id=user_id, cover_image=cover_image, media_path=media_path
