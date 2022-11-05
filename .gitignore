@@ -272,6 +272,7 @@ cython_debug/
 # Local database files
 *.db
 *.db-journal
+.DS_Store
 
 # Media
 media/*

@@ -1,20 +1,11 @@
 version: "3"
 services:
-  postgres:
-    image: postgres:11
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=wookie_books_user
-      - POSTGRES_PASSWORD=wookie_books_user_password
-      - POSTGRES_DB=postgres
   web:
+    command: uvicorn wookie_books.main:app --host 0.0.0.0 --port 80
     build: .
     volumes:
       - .:/code
     ports:
       - "80:80"
-    depends_on:
-      - postgres
     env_file:
       - .env
