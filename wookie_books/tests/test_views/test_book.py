@@ -61,11 +61,8 @@ def test_delete_book(db, client, base_user, create_book, get_auth_headers, base_
 
 def test_delete_book_not_authorized(client, create_book):
     base_book = create_book()
-    with open("resources/BookCover.jpg", "wb"):
-        pass
-
     response = client.delete(f"/books/{base_book.id}")
-    assert response.status_code == 200
+    assert response.status_code == 401
 
 
 def test_delete_book_from_another_user(client, create_book, base_users, get_auth_headers, base_user_password):
@@ -103,11 +100,10 @@ def test_darth_vader_can_not_create_book(
     assert response.json()["detail"] == "The dark lord can not submit books!"
 
 
-def test_user_can_create_book(client, authenticate_user, base_user, mocker):
+def test_user_can_create_book(client, get_auth_headers, base_user, mocker):
     mocker.patch("wookie_books.utils.write_file_to_media")
     author_id = base_user.id
-    token_data = authenticate_user(username=base_user.username, password="generic")
-    headers = {"Authorization": f"{token_data['token_type'].capitalize()} {token_data['access_token']}"}
+    headers = get_auth_headers(username=base_user.username, password="generic")
     query_params = "?title=Title&description=Description&price=10000"
     with open("resources/Forests.jpg", "rb") as f:
         files = {"cover_image": ("filename", f, "image/jpeg")}
