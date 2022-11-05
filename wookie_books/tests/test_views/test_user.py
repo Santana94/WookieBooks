@@ -76,3 +76,39 @@ def test_list_no_users(client):
     response = client.get(f"/users/")
     assert response.status_code == 200
     assert response.json() == []
+
+
+@pytest.mark.parametrize("data, expected_response", [
+    (
+        {},
+        {'books': [], 'username': 'base_user'},
+    ),
+    (
+        {"username": "some_username"},
+        {'books': [], 'username': 'some_username'},
+    ),
+    (
+        {"password": "some_password"},
+        {'books': [], 'username': 'base_user'},
+    ),
+    (
+        {"password": "some_password", "username": "123"},
+        {'books': [], 'username': '123'},
+    ),
+])
+def test_update_user(
+    base_user, client, data, expected_response, get_auth_headers, base_user_password
+):
+    headers = get_auth_headers(username=base_user.username, password=base_user_password)
+    response = client.patch(f"/current_user/", json=data, headers=headers)
+    assert response.status_code == 200
+    response_data = response.json()
+    assert response_data.pop("id") == base_user.id
+    assert response_data == expected_response
+
+
+def test_update_user_with_no_permission(
+    base_users, client, get_auth_headers, base_user_password
+):
+    response = client.patch(f"/current_user/", json={"password": "some_password", "username": "123"})
+    assert response.status_code == 401

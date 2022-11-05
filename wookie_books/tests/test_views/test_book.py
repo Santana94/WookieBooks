@@ -16,13 +16,14 @@ def test_unauthenticated_user_can_not_post_books(client):
     "darth_somehting", "not_vader", "not_darth", "I am not vader", "Not DARTH HERE", "VaDeR", "darth_vader_official",
     "the_real_darth_vader"
 ])
-def test_darth_vader_can_not_create_book(client, authenticate_user, darth_vader, mocker, username, db):
+def test_darth_vader_can_not_create_book(
+    client, get_auth_headers, darth_vader, mocker, username, db, darth_vader_password
+):
     darth_vader.username = username
     db.add(darth_vader)
     db.commit()
     mocker.patch("wookie_books.utils.write_file_to_media")
-    token_data = authenticate_user(username=darth_vader.username, password="shmi_skywalker")
-    headers = {"Authorization": f"{token_data['token_type'].capitalize()} {token_data['access_token']}"}
+    headers = get_auth_headers(username=darth_vader.username, password=darth_vader_password)
     query_params = "?title=Title&description=Description&price=10000"
     with open("resources/Forests.jpg", "rb") as f:
         files = {"cover_image": ("filename", f, "image/jpeg")}

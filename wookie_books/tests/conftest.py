@@ -28,12 +28,11 @@ def db(db_engine):
     connection = db_engine.connect()
 
     # begin a non-ORM transaction
-    transaction = connection.begin()
+    connection.begin()
 
     # bind an individual Session to the connection
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
     db = TestingSessionLocal(bind=connection)
-    # db = Session(db_engine)
 
     yield db
 
@@ -59,8 +58,13 @@ def base_users(db):
 
 
 @pytest.fixture
-def base_user(db):
-    return repository.create_user(db=db, user=schemas.UserCreate(username="base_user", password="generic"))
+def base_user_password():
+    return "generic"
+
+
+@pytest.fixture
+def base_user(db, base_user_password):
+    return repository.create_user(db=db, user=schemas.UserCreate(username="base_user", password=base_user_password))
 
 
 @pytest.fixture
@@ -79,12 +83,18 @@ def create_base_books(db, mocker):
 
 
 @pytest.fixture
-def darth_vader(db):
-    return repository.create_user(db=db, user=schemas.UserCreate(username="darth_vader", password="shmi_skywalker"))
+def darth_vader_password():
+    return "shmi_skywalker"
 
 
 @pytest.fixture
-def authenticate_user(client):
+def darth_vader(db, darth_vader_password):
+    return repository.create_user(db=db, user=schemas.UserCreate(username="darth_vader", password=darth_vader_password))
+
+
+@pytest.fixture
+def get_auth_headers(client):
     def authenticate(username: str, password: str):
-        return client.post("/token", data={"username": username, "password": password}).json()
+        token_data = client.post("/token", data={"username": username, "password": password}).json()
+        return {"Authorization": f"{token_data['token_type'].capitalize()} {token_data['access_token']}"}
     return authenticate
